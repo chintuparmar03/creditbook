@@ -1,0 +1,20 @@
+# Python
+*.pyc
+__pycache__/
+venv/
+db.sqlite3
+media/
+staticfiles/
+*.egg-info/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node (frontend has its own .gitignore)
+node_modules/
