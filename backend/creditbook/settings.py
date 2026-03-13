@@ -93,12 +93,29 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS
-FRONTEND_URL = os.environ.get('FRONTEND_URL', '')
-if FRONTEND_URL:
-    CORS_ALLOWED_ORIGINS = [FRONTEND_URL]
-else:
-    CORS_ALLOW_ALL_ORIGINS = True
+# CORS – allow frontend to call the API
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
 
 # DRF
 REST_FRAMEWORK = {
