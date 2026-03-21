@@ -101,14 +101,20 @@ class TransactionCreateView(generics.CreateAPIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
-        txn = serializer.save(
-            shop=self.request.user.shop,
-            created_by=self.request.user,
-        )
-        ActivityLog.objects.create(
-            user=self.request.user,
-            action=f'{txn.type.title()} ₹{txn.amount} for {txn.customer.name}'
-        )
+        import logging
+        logger = logging.getLogger(__name__)
+        try:
+            txn = serializer.save(
+                shop=self.request.user.shop,
+                created_by=self.request.user,
+            )
+            ActivityLog.objects.create(
+                user=self.request.user,
+                action=f'{txn.type.title()} ₹{txn.amount} for {txn.customer.name}'
+            )
+        except Exception as e:
+            logger.error(f"Transaction creation failed: {e}", exc_info=True)
+            raise
 
 
 class CustomerLedgerView(generics.ListAPIView):
