@@ -8,3 +8,5 @@ whitenoise>=6.5
 dj-database-url>=2.1
 psycopg2-binary>=2.9
 twilio>=9.0
+cloudinary>=1.36
+django-cloudinary-storage>=0.3
