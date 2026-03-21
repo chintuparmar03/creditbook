@@ -4,6 +4,7 @@ Django settings for CreditBook Pro.
 import os
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -72,12 +73,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'creditbook.wsgi.application'
 
-# Database – SQLite for local dev, switch to MySQL for production
+# Database – PostgreSQL on Render (via DATABASE_URL), SQLite for local dev
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'
+    )
 }
 
 AUTH_USER_MODEL = 'api.User'
