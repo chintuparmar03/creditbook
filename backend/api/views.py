@@ -9,11 +9,12 @@ from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
 
-from .models import Shop, Customer, Transaction, ActivityLog
+from .models import Shop, Customer, Transaction, ActivityLog, ReminderConfig, ReminderLog
 from .serializers import (
     RegisterSerializer, CustomerSerializer, TransactionSerializer,
-    StaffSerializer, UserSerializer,
+    StaffSerializer, UserSerializer, ReminderConfigSerializer, ReminderLogSerializer,
 )
+from .reminder_service import send_weekly_reminders
 
 User = get_user_model()
 
@@ -300,3 +301,62 @@ class CustomerRiskView(APIView):
             'customer': CustomerSerializer(customer).data,
             'risk': risk,
         })
+
+
+# ─── Reminders ───────────────────────────────────────────────────
+
+class ReminderConfigView(APIView):
+    """GET / PUT reminder config for the shop owner."""
+
+    def get(self, request):
+        config, created = ReminderConfig.objects.get_or_create(shop=request.user.shop)
+        return Response(ReminderConfigSerializer(config).data)
+
+    def put(self, request):
+        config, created = ReminderConfig.objects.get_or_create(shop=request.user.shop)
+        serializer = ReminderConfigSerializer(config, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class ReminderLogListView(generics.ListAPIView):
+    """GET reminder send history for the shop."""
+    serializer_class = ReminderLogSerializer
+
+    def get_queryset(self):
+        return ReminderLog.objects.filter(shop=self.request.user.shop)[:50]
+
+
+class TriggerRemindersView(APIView):
+    """
+    POST endpoint to trigger sending reminders.
+    Protected by secret token (for external cron) OR authenticated owner.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        from django.conf import settings as django_settings
+
+        # Auth: either valid JWT owner or secret token
+        token = request.data.get('token') or request.query_params.get('token')
+        secret = django_settings.REMINDER_SECRET_TOKEN
+
+        if token and secret and token == secret:
+            # Cron trigger – send for all enabled shops matching today
+            today = timezone.now().weekday()
+            configs = ReminderConfig.objects.filter(enabled=True, day_of_week=today)
+            results = []
+            for config in configs.select_related('shop'):
+                result = send_weekly_reminders(config.shop)
+                results.append({'shop': config.shop.shop_name, **result})
+            return Response({'results': results})
+
+        # Manual trigger by authenticated owner
+        if request.user and request.user.is_authenticated:
+            if not request.user.shop:
+                return Response({'error': 'No shop associated'}, status=400)
+            result = send_weekly_reminders(request.user.shop)
+            return Response(result)
+
+        return Response({'error': 'Unauthorized'}, status=401)

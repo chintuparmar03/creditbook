@@ -22,4 +22,9 @@ urlpatterns = [
     # Analytics
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('customer-risk/<int:customer_id>/', views.CustomerRiskView.as_view(), name='customer-risk'),
+
+    # Reminders
+    path('reminders/config/', views.ReminderConfigView.as_view(), name='reminder-config'),
+    path('reminders/logs/', views.ReminderLogListView.as_view(), name='reminder-logs'),
+    path('reminders/trigger/', views.TriggerRemindersView.as_view(), name='reminder-trigger'),
 ]

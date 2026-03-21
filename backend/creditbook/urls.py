@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files (uploaded transaction images) in all environments.
+# For high-traffic production, consider using S3/Cloudinary instead.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

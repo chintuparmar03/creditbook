@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Shop, Customer, Transaction, ActivityLog
+from .models import Shop, Customer, Transaction, ActivityLog, ReminderConfig, ReminderLog
 
 User = get_user_model()
 
@@ -104,3 +104,28 @@ class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityLog
         fields = '__all__'
+
+
+class ReminderConfigSerializer(serializers.ModelSerializer):
+    day_of_week_display = serializers.CharField(source='get_day_of_week_display', read_only=True)
+    channel_display = serializers.CharField(source='get_channel_display', read_only=True)
+
+    class Meta:
+        model = ReminderConfig
+        fields = [
+            'id', 'enabled', 'channel', 'channel_display',
+            'day_of_week', 'day_of_week_display',
+            'message_template', 'last_sent_at', 'created_at',
+        ]
+        read_only_fields = ['last_sent_at', 'created_at']
+
+
+class ReminderLogSerializer(serializers.ModelSerializer):
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
+
+    class Meta:
+        model = ReminderLog
+        fields = [
+            'id', 'customer', 'customer_name', 'channel',
+            'phone', 'message', 'status', 'error_message', 'sent_at',
+        ]

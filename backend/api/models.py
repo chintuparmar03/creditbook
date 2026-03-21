@@ -87,3 +87,52 @@ class ActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username}: {self.action}"
+
+
+class ReminderConfig(models.Model):
+    CHANNEL_CHOICES = [
+        ('sms', 'SMS'),
+        ('whatsapp', 'WhatsApp'),
+    ]
+    DAY_CHOICES = [
+        (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
+        (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday'),
+    ]
+
+    shop = models.OneToOneField(Shop, on_delete=models.CASCADE, related_name='reminder_config')
+    enabled = models.BooleanField(default=False)
+    channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES, default='whatsapp')
+    day_of_week = models.IntegerField(choices=DAY_CHOICES, default=0)
+    message_template = models.TextField(
+        default='Hi {customer_name}, this is a reminder from {shop_name}. '
+                'Your outstanding balance is ₹{balance}. '
+                'Total credit: ₹{total_credit}, Total paid: ₹{total_payment}. '
+                'Please clear your dues at your earliest convenience. Thank you!'
+    )
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reminder config for {self.shop.shop_name}"
+
+
+class ReminderLog(models.Model):
+    STATUS_CHOICES = [
+        ('sent', 'Sent'),
+        ('failed', 'Failed'),
+    ]
+
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='reminder_logs')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reminder_logs')
+    channel = models.CharField(max_length=10)
+    phone = models.CharField(max_length=20)
+    message = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    error_message = models.TextField(blank=True, default='')
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-sent_at']
+
+    def __str__(self):
+        return f"{self.status}: {self.customer.name} ({self.channel})"

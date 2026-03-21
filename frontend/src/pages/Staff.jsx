@@ -67,6 +67,7 @@ export default function Staff() {
         </div>
       ) : (
         <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="table-wrapper">
           <table className="data-table">
             <thead>
               <tr>
@@ -97,6 +98,7 @@ export default function Staff() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

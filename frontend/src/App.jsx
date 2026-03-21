@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
 import CustomerLedger from './pages/CustomerLedger'
 import Staff from './pages/Staff'
+import Reminders from './pages/Reminders'
 import './App.css'
 
 const AuthContext = createContext(null)
@@ -66,6 +67,7 @@ function App() {
           <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
           <Route path="/customers/:id/ledger" element={<ProtectedRoute><CustomerLedger /></ProtectedRoute>} />
           <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
+          <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
